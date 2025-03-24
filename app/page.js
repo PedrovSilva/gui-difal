@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,9 +16,10 @@ export default function DifalCalculator() {
     VALR_SEGURO_ITEM: "",
     VALR_DESCONTO_ITEM: "",
     ALIQ_ORIGEM: ""
-    
   });
+  
   const [response, setResponse] = useState(null);
+  const [loading, setLoading] = useState(false); // Adicionado o estado de carregamento
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -24,6 +27,7 @@ export default function DifalCalculator() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true); // Inicia o carregamento
     try {
       const res = await axios.post("https://api-difal.onrender.com/api/difal/naoContribuinte", [formData], {
         headers: {
@@ -34,6 +38,8 @@ export default function DifalCalculator() {
       setResponse(res.data);
     } catch (error) {
       console.error("Erro ao enviar requisição", error);
+    } finally {
+      setLoading(false); // Finaliza o carregamento
     }
   };
 
@@ -56,8 +62,11 @@ export default function DifalCalculator() {
                 />
               </div>
             ))}
-            <Button type="submit">Calcular</Button>
+            <Button type="submit" disabled={loading}> {/* Desativa o botão enquanto carrega */}
+              {loading ? "Calculando..." : "Calcular"} {/* Texto alternado durante o carregamento */}
+            </Button>
           </form>
+          {loading && <p className="mt-4 text-center text-gray-500">Carregando...</p>} {/* Indicador de carregamento */}
           {response && (
             <div className="mt-4 p-3 bg-gray-100 rounded">
               <h3 className="font-semibold">Resultado:</h3>
